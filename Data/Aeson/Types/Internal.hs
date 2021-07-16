@@ -82,6 +82,7 @@ module Data.Aeson.Types.Internal
     , DotNetTime(..)
     ) where
 
+import Debug.Trace
 import Prelude.Compat
 
 import Control.Applicative (Alternative(..))
@@ -473,7 +474,7 @@ formatError path msg = "Error in " ++ formatPath path ++ ": " ++ msg
 -- | Format a <http://goessner.net/articles/JsonPath/ JSONPath> as a 'String',
 -- representing the root object as @$@.
 formatPath :: JSONPath -> String
-formatPath path = "$" ++ formatRelativePath path
+formatPath path = trace ("formatPath: " ++ show path)  $ "$" ++ formatRelativePath path
 
 -- | Format a <http://goessner.net/articles/JsonPath/ JSONPath> as a 'String'
 -- which represents the path relative to some root object.
@@ -529,7 +530,9 @@ object = Object . H.fromList
 --
 -- Since 0.10
 (<?>) :: Parser a -> JSONPathElement -> Parser a
-p <?> pathElem = Parser $ \path kf ks -> runParser p (pathElem:path) kf ks
+p <?> pathElem =
+  trace ("Aeson: adding " ++ show pathElem) $
+  Parser $ \path kf ks -> runParser p (pathElem:path) kf ks
 
 -- | If the inner @Parser@ failed, modify the failure message using the
 -- provided function. This allows you to create more descriptive error messages.
